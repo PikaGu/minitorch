@@ -99,16 +99,13 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     
     for node in d_chain:
         d_out = d_map.get(node.unique_id)
-        print(node.unique_id, d_out)
         if node.is_leaf():
             node.accumulate_derivative(d_out)
         else:
             new_grads = node.chain_rule(d_out)
             for (input, diff) in new_grads:
-                print(input.unique_id, diff, end=".\n")
                 pre = d_map.get(input.unique_id, 0.0)
                 d_map.update({input.unique_id: pre+diff})
-    print(d_map)
 
 
 @dataclass
