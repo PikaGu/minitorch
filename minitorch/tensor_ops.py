@@ -14,6 +14,8 @@ from .tensor_data import (
     to_index,
 )
 
+from .operators import prod, reduce
+
 if TYPE_CHECKING:
     from .tensor import Tensor
     from .tensor_data import Index, Shape, Storage, Strides
@@ -84,6 +86,7 @@ class TensorBackend:
         self.relu_back_zip = ops.zip(operators.relu_back)
         self.log_back_zip = ops.zip(operators.log_back)
         self.inv_back_zip = ops.zip(operators.inv_back)
+        self.sigmoid_back_zip = ops.zip(operators.sigmoid_back)
 
         # Reduce
         self.add_reduce = ops.reduce(operators.add, 0.0)
@@ -264,8 +267,13 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        in_index = np.zeros_like(in_shape)
+        out_index = np.zeros_like(out_shape)
+        out_len = int(prod(list(out_shape)))
+        for i in range(out_len):
+            to_index(i, out_shape, out_index)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+            out[i] = fn(in_storage[index_to_position(in_index, in_strides)])
 
     return _map
 
@@ -309,8 +317,17 @@ def tensor_zip(
         b_shape: Shape,
         b_strides: Strides,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        a_index = np.zeros_like(a_shape)
+        b_index = np.zeros_like(b_shape)
+        out_index = np.zeros_like(out_shape)
+        out_len = int(prod(list(out_shape)))
+        for i in range(out_len):
+            to_index(i, out_shape, out_index)
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            a = a_storage[index_to_position(a_index, a_strides)]
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+            b = b_storage[index_to_position(b_index, b_strides)]
+            out[i] = fn(a, b)
 
     return _zip
 
@@ -340,8 +357,19 @@ def tensor_reduce(
         a_strides: Strides,
         reduce_dim: int,
     ) -> None:
-        # TODO: Implement for Task 2.3.
-        raise NotImplementedError('Need to implement for Task 2.3')
+        out_index = np.zeros_like(out_shape)
+        
+        out_len = int(prod(list(out_shape)))
+        for i in range(out_len):
+            to_index(i, out_shape, out_index)
+            
+            a_index = [j for j in out_index]
+            a_values = []
+            for j in range(a_shape[reduce_dim]):
+                a_index[reduce_dim] = j
+                a_values.append(a_storage[index_to_position(a_index, a_strides)])
+
+            out[i] = reduce(fn, out[i])(a_values)
 
     return _reduce
 

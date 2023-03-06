@@ -9,7 +9,7 @@ import numpy.typing as npt
 from numpy import array, float64
 from typing_extensions import TypeAlias
 
-from .operators import prod, mul, sum, zipWith
+from .operators import prod
 
 MAX_DIMS = 32
 
@@ -42,7 +42,10 @@ def index_to_position(index: Index, strides: Strides) -> int:
     Returns:
         Position in storage
     """
-    return sum(zipWith(mul)(index, strides))
+    pos = 0
+    for i in range(len(index)):
+        pos += index[i] * strides[i]
+    return pos
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -86,8 +89,9 @@ def broadcast_index(
     Returns:
         None
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError('Need to implement for Task 2.2')
+    for i in range(len(shape)):
+        offset = i + len(big_shape) - len(shape)
+        out_index[i] = big_index[offset] if shape[i] != 1 else 0
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -104,9 +108,17 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     Raises:
         IndexingError : if cannot broadcast
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError('Need to implement for Task 2.2')
+    if len(shape1) < len(shape2):
+        shape1 = [1] * (len(shape2)-len(shape1)) + list(shape1)
+    if len(shape2) < len(shape1):
+        shape2 = [1] * (len(shape1)-len(shape2)) + list(shape2)
 
+    broadcasted_shape = []
+    for (a, b) in zip(shape1, shape2):
+        if a != b and a != 1 and b != 1:
+            raise IndexingError(f"Can not broadcast between shape1 {shape1} and shape2 {shape2}.")
+        broadcasted_shape.append(max(a, b))
+    return tuple(broadcasted_shape)
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
     layout = [1]

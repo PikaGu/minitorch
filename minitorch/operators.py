@@ -97,6 +97,10 @@ def relu_back(x: float, d: float) -> float:
     r"If $f = relu$ compute $d \times f'(x)$"
     return 0 if x <= 0 else d
 
+def sigmoid_back(x: float, d: float) -> float:
+    exp_x = exp(-x)
+    return d * exp_x / ((1 + exp_x) ** 2)
+
 # ## Task 0.3
 
 # Small practice library of elementary higher-order functions.
@@ -145,7 +149,7 @@ def zipWith(
 
 def addLists(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
     "Add the elements of `ls1` and `ls2` using `zipWith` and `add`"
-    return zipWith(lambda x, y: add(x, y))(ls1, ls2)
+    return zipWith(add)(ls1, ls2)
 
 def reduce(
     fn: Callable[[float, float], float], start: float

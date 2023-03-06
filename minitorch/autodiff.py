@@ -72,6 +72,8 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         if v.unique_id in vis:
             return
         vis[v.unique_id] = True
+        if v.is_constant():
+            return
         for p in v.parents:
             if not p.unique_id in done:
                 dfs_toposort(p)
