@@ -65,10 +65,10 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index[0] = ordinal
         return
 
-    strides = strides_from_shape(shape)
-    for i in range(len(strides)):
-        out_index[i] = ordinal // strides[i]
-        ordinal %= strides[i]
+    cur = ordinal
+    for i in range(len(shape)-1, -1, -1):
+        out_index[i] = cur % shape[i]
+        cur //= shape[i]
 
 def broadcast_index(
     big_index: Index, big_shape: Shape, shape: Shape, out_index: OutIndex

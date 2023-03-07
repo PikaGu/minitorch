@@ -58,7 +58,7 @@ def sigmoid(x: float) -> float:
 
     for stability.
     """
-    return 1.0 / (1.0 + exp(-x)) if x >= 0 else exp(x) / (1.0 + exp(x))
+    return 1.0 / (1.0 + math.exp(-x)) if x >= 0 else math.exp(x) / (1.0 + math.exp(x))
 
 def relu(x: float) -> float:
     """
@@ -66,7 +66,7 @@ def relu(x: float) -> float:
 
     (See https://en.wikipedia.org/wiki/Rectifier_(neural_networks) .)
     """
-    return max(0.0, x)
+    return x if x > 0 else 0
 
 EPS = 1e-6
 
@@ -83,7 +83,7 @@ def exp(x: float) -> float:
 
 def log_back(x: float, d: float) -> float:
     r"If $f = log$ as above, compute $d \times f'(x)$"
-    return d * inv(x)
+    return d / (x + EPS)
 
 def inv(x: float) -> float:
     "$f(x) = 1/x$"
@@ -98,7 +98,7 @@ def relu_back(x: float, d: float) -> float:
     return 0 if x <= 0 else d
 
 def sigmoid_back(x: float, d: float) -> float:
-    exp_x = exp(-x)
+    exp_x = math.exp(-x)
     return d * exp_x / ((1 + exp_x) ** 2)
 
 # ## Task 0.3
@@ -125,7 +125,7 @@ def map(fn: Callable[[float], float]) -> Callable[[Iterable[float]], Iterable[fl
 
 def negList(ls: Iterable[float]) -> Iterable[float]:
     "Use `map` and `neg` to negate each element in `ls`"
-    return map(lambda x: neg(x))(ls)
+    return map(neg)(ls)
 
 def zipWith(
     fn: Callable[[float, float], float]
